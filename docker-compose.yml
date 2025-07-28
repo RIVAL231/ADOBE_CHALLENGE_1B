@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  ollama:
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  app:
+    build: .
+    container_name: doc-intel
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_URL=http://ollama:11434/api/generate
+    volumes:
+      - .:/app
+    command: ["sh", "-c", "sleep 10 && python ollama_integration.py"]
+    restart: no
+volumes:
+  ollama-data:

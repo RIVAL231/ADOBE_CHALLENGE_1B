@@ -1,20 +1,31 @@
-🚀 Challenge 1b: Persona-Driven Document Intelligence (w/ Ollama Integration)
-🧠 Objective
-Extract and analyze the most relevant sections from a set of PDFs using a local LLM (Gemma 1B) running via Ollama, guided by persona and task context.
+# 🚀 Challenge 1b: Persona-Driven Document Intelligence (with Ollama)
 
-🧰 Solution Architecture
-This project uses Docker Compose to run:
+## 🧠 Overview
 
-📄 A local PDF analysis + summarization app
+This project extracts the most relevant sections from PDFs using a local LLM (`gemma3:1b`) via [Ollama](https://ollama.com/). It is fully offline, CPU-only, and designed to work with specific personas and job-to-be-done tasks.
 
-🧠 Ollama with the gemma3:1b model for local LLM inference
+---
 
-✅ All processing is 100% offline (CPU-only) and secure.
+## ⚙️ Architecture
 
-📥 Input Format (challenge1b_input.json)
-json
-Copy
-Edit
+This solution runs using **Docker Compose**:
+
+* 🧠 Ollama (runs `gemma3:1b`)
+* 🗞️ A PDF parser + section analyzer (our app)
+
+### 🔐 Privacy & Performance
+
+* 100% offline after initial setup
+* No internet or GPU required
+* Runs fast on modern CPUs
+
+---
+
+## 📅 Input Format
+
+### `challenge1b_input.json`
+
+```json
 {
   "challenge_info": {
     "challenge_id": "round_1b_example",
@@ -30,10 +41,15 @@ Edit
     "task": "Find features relevant to enterprise deployment"
   }
 }
-📤 Output Format (challenge1b_output.json)
-json
-Copy
-Edit
+```
+
+---
+
+## 📄 Output Format
+
+### `challenge1b_output.json`
+
+```json
 {
   "metadata": {
     "input_documents": ["sample.pdf"],
@@ -56,65 +72,110 @@ Edit
     }
   ]
 }
-⚙️ How to Run the Project (3-Step Setup)
-💡 Recommended: Use this manual startup method to avoid race conditions and control each step.
+```
 
-Step 1: Start the Ollama service
-bash
-Copy
-Edit
+---
+
+## 🚀 How to Run (3-Step Setup)
+
+> 💡 Use this manual startup flow for full control and reliability.
+
+### 1️⃣ Start Ollama
+
+```bash
 docker compose up -d ollama
-Wait ~30 seconds for Ollama to fully boot.
+```
 
-Step 2: Pull the model (Gemma 3B)
-bash
-Copy
-Edit
+Wait \~30 seconds for it to boot fully.
+
+---
+
+### 2️⃣ Pull the model
+
+```bash
 docker exec -it ollama ollama pull gemma3:1b
-This downloads the model (~815MB) locally into the Ollama container.
+```
 
-Step 3: Start the PDF analysis app
-bash
-Copy
-Edit
+Downloads the 815MB model inside the container.
+
+---
+
+### 3️⃣ Run the app
+
+```bash
 docker compose up app --build
-This processes the collection and creates the final output JSON file.
+```
 
-🗂️ Collection Configuration
-You can select the collection to run by editing the entry point of ollama_integration.py:
+The app will read input, process PDFs, run LLM extraction, and write final output JSON.
 
-python
-Copy
-Edit
-if __name__ == "__main__":
-    process_collection("Collection 1")  # Change to Collection 2, Collection 3 etc.
-📍 Output Location
-The output file will be written as:
+---
 
-pgsql
-Copy
-Edit
+## 📂 Output Location
+
+After execution, your result will be saved in the collection directory:
+
+```
 Collection X/
 ├── challenge1b_input.json
 ├── PDFs/
-├── challenge1b_output.json  ✅
-✅ Why This Approach Works Best
-Feature	Benefit
-✅ Offline	No internet needed after setup
-✅ Transparent	Step-by-step visibility into each stage
-✅ Flexible	Easy to debug, swap models, or change structure
-✅ Fast	Finishes in under 60 seconds for most cases
+├── challenge1b_output.json ✅
+```
 
-🛠 Troubleshooting
-Problem	Solution
-❌ model not found	Run docker exec -it ollama ollama pull gemma3:1b
-❌ connection refused	Run docker compose up -d ollama again
-❌ invalid response from LLM	Check Ollama logs: docker compose logs ollama
-🧼 Reset everything	
+---
 
-bash
-Copy
-Edit
+## ✏️ Configure Which Collection to Run
+
+Edit `ollama_integration.py`:
+
+```python
+if __name__ == "__main__":
+    process_collection("Collection 1")  # Change as needed
+```
+
+---
+
+## 🧰 Troubleshooting
+
+| ❗ Issue                | ✅ Fix                                              |
+| ---------------------- | -------------------------------------------------- |
+| `model not found`      | Run step 2 again                                   |
+| `connection refused`   | Ensure Ollama is up: `docker compose up -d ollama` |
+| LLM errors or timeouts | Run: `docker compose logs ollama`                  |
+| Reset all              |                                                    |
+
+```bash
 docker compose down
 docker compose up -d ollama
-# Wait 30 seconds, then repeat steps 2 & 3
+# Wait, then repeat steps 2 & 3
+```
+
+---
+
+## 📦 Requirements
+
+* Docker Desktop (Windows/Mac) or Docker Engine (Linux)
+* At least **8GB RAM**
+* Disk space (\~1GB for model)
+
+---
+
+## 📙 Model Info
+
+| Model       | Size  | Description                                                |
+| ----------- | ----- | ---------------------------------------------------------- |
+| `gemma3:1b` | 815MB | Local language model for summarization & section selection |
+
+---
+
+## 🙌 Why This Approach?
+
+| ✅ Benefit     | ✨ Reason                   |
+| ------------- | -------------------------- |
+| Offline       | Secure and fast            |
+| Step-by-step  | Easy to debug              |
+| Local LLM     | No API limits              |
+| Persona-aware | Tailored, relevant outputs |
+
+---
+
+> Made for Challenge 1b with ❤️ using PyMuPDF, pdfplumber, and Ollama.

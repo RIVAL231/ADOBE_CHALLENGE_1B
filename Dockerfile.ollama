@@ -2,10 +2,11 @@
 FROM ollama/ollama AS model-downloader
 
 # Start ollama server in background and pull the model
-RUN ollama serve & \
-    sleep 10 && \
-    ollama pull gemma3:1b && \
-    pkill ollama
+RUN nohup ollama serve > /dev/null 2>&1 & \
+    sleep 15 && \
+    OLLAMA_HOST=http://localhost:11434 ollama pull gemma3:1b && \
+    sleep 5 && \
+    pkill -f ollama
 
 # Stage 2: Build the final Ollama container with the pre-downloaded model
 FROM ollama/ollama
@@ -21,4 +22,4 @@ COPY --from=model-downloader /root/.ollama /root/.ollama
 EXPOSE 11434
 
 # Command to run Ollama when the container starts
-CMD ["ollama", "serve"]
+CMD ["/bin/ollama", "serve"]
